@@ -66,7 +66,7 @@ main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:spa
 <main>
 <header class="topbar">
   <div class="location">YOUR LOCATION <b>📍 Ligao City, Albay <span style="color:#16835f;font-size:11px">●</span></b></div>
-  <div class="top-actions"><button class="icon-btn" aria-label="Notifications" onclick="showModal('notifications')">♧</button><button class="icon-btn" aria-label="Help" onclick="showModal('help')">?</button><div class="avatar">J</div></div>
+  <div class="top-actions"><button class="icon-btn" aria-label="Notifications" onclick="showModal('notifications')">♧</button><button class="icon-btn" aria-label="Help" onclick="showModal('help')">?</button><button class="avatar" id="accountButton" type="button" aria-label="Sign in or view account" onclick="showModal('auth')">J</button></div>
 </header>
 <section class="page active" id="page-home">
   <div class="hero"><div class="hero-copy"><div class="eyebrow">ARANGKADA NA, LIGAO!</div><h1>Your ride.<br>Your way.</h1><p>Book a ride with a driver or rent a motorcycle and explore on your own.</p><button class="btn btn-primary" onclick="showModal('ride')">Book a ride&nbsp; →</button></div><div class="hero-art">🏍</div></div>
@@ -114,12 +114,40 @@ main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:spa
 <div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Book a ride</h2><button class="close" onclick="closeModal()" aria-label="Close">✕</button></div><p id="modalDesc">Enter your trip details to preview a booking request.</p><form class="modal-form" id="modalForm"><div id="modalFields"></div><button class="btn btn-primary" type="submit" id="modalSubmit">Continue</button></form><div class="result" id="modalResult"></div></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-window.LIGAO_RIDE_CONFIG = { defaultCenter: { lat: 13.2167, lng: 123.5167 }, defaultZoom: 13 };
-</script>
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const pages=['home','rentals','bookings','wallet','profile'];
+let supabaseClient=null, currentUser=null, authMode='signin';
+(function initSupabase(){
+ const c=window.LIGAO_RIDE_CONFIG||{};
+ if(window.supabase?.createClient && c.supabaseUrl && c.supabaseAnonKey &&
+    !c.supabaseUrl.startsWith('YOUR_') && !c.supabaseAnonKey.startsWith('YOUR_')){
+   supabaseClient=window.supabase.createClient(c.supabaseUrl,c.supabaseAnonKey);
+   supabaseClient.auth.getSession().then(({data})=>{currentUser=data.session?.user||null;refreshAccountUI();if(currentUser)loadMyBookings()});
+   supabaseClient.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;refreshAccountUI();if(currentUser)loadMyBookings()});
+ }
+})();
+function refreshAccountUI(){
+ const b=document.getElementById('accountButton');
+ if(b)b.textContent=currentUser?(currentUser.user_metadata?.full_name||currentUser.email||'U').trim().charAt(0).toUpperCase():'J';
+}
+function showAuth(mode='signin'){
+ authMode=mode;showModal('auth');
+ const switcher=document.getElementById('authSwitch');
+ if(switcher)switcher.textContent=mode==='signin'?'Need an account? Create one':'Already registered? Sign in';
+ const btn=document.getElementById('modalSubmit');if(btn)btn.textContent=mode==='signin'?'Sign in':'Create account';
+}
+async function loadMyBookings(){
+ if(!supabaseClient||!currentUser)return;
+ const box=document.getElementById('bookingList');if(!box)return;
+ const {data,error}=await supabaseClient.from('bookings').select('*').order('created_at',{ascending:false}).limit(50);
+ if(error){console.error(error);return}
+ box.innerHTML='';
+ if(!data?.length){box.innerHTML='<p style="color:#777;font-size:13px">No bookings yet. Choose Pasundo or MotoRent to get started.</p>';return}
+ data.forEach(b=>{const row=document.createElement('div');row.className='trip';row.innerHTML='<div class="trip-icon">🛵</div><div><strong></strong><small></small></div><span class="price"></span>';row.querySelector('strong').textContent=b.booking_type==='pasundo'?'Pasundo ride':'MotoRent · '+(b.motorcycle_name||'Motorcycle');row.querySelector('small').textContent=(b.status||'pending')+' · '+(b.pickup_address||b.start_date||'Request');row.querySelector('.price').textContent=b.payment_method||'Cash';box.appendChild(row)});
+}
 function go(name){pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
 const wrap=document.getElementById('modalWrap'), title=document.getElementById('modalTitle'), desc=document.getElementById('modalDesc'), fields=document.getElementById('modalFields'), submit=document.getElementById('modalSubmit'), result=document.getElementById('modalResult');
@@ -255,6 +283,7 @@ function wireDestinationPicker(){
 function showModal(which){
  mode=which;result.classList.remove('show');result.textContent='';
  const configs={
+ auth:['Customer account','Sign in or create a customer account to save and track your bookings.',`<div class="field" id="authNameWrap"><label>Full name (for new accounts)</label><input id="authFullName" autocomplete="name" placeholder="Your full name"></div><div class="field"><label>Email address</label><input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com"></div><div class="field"><label>Password</label><input id="authPassword" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></div><div class="field"><label>Mobile number (optional)</label><input id="authPhone" type="tel" autocomplete="tel" placeholder="09XX XXX XXXX"></div><button type="button" class="text-btn" id="authSwitch" onclick="showAuth(authMode==='signin'?'signup':'signin')">Need an account? Create one</button><div class="notice">Use a unique password. Email confirmation may be required depending on your Supabase settings.</div>`,'Sign in'],
  ride:['Book a Pasundo ride','Tell us where to pick you up and where you are going. Choose CASH or QR Ph and optionally add a tip for your rider.',`<div class="field location-search-wrap"><label>Pickup location</label><input id="pickupLocation" required autocomplete="off" placeholder="Search a place or address…"><div class="location-results" id="pickupResults"></div><div class="location-actions"><button type="button" class="btn btn-light" id="useCurrentLocation">◎ Use my current location</button></div><div class="location-status" id="pickupStatus">Search for a place and press Enter, or use your device location.</div></div>`+`<div class="field location-search-wrap"><label>Destination</label><input id="destinationLocation" required autocomplete="off" placeholder="Search destination or address…"><div class="location-results" id="destinationResults"></div><div class="location-actions"><button type="button" class="btn btn-light" id="pickDestinationMap">⌖ Choose on map</button></div><div class="location-status" id="destinationStatus">Search a place or choose a point on the map.</div><div class="map-picker" id="destinationMapPicker" style="display:none"><div class="map-picker-head"><span>Choose destination</span><button type="button" class="text-btn" id="closeDestinationMap">Close map</button></div><div class="map-live-canvas" id="destinationLiveMap" aria-label="OpenStreetMap destination picker"></div><div class="map-preview demo-map" id="destinationMapCanvas" role="button" tabindex="0" aria-label="Select destination point on map"><span class="map-pin">📍</span><span class="map-hint">Tap the map to place the pin</span></div><div class="map-footer" id="destinationMapNote">Use the interactive OpenStreetMap above to choose a real destination point.</div><div style="padding:0 12px 12px;background:#fff"><button type="button" class="btn btn-primary" id="confirmDestinationMap">Use this point</button></div></div></div>`+field('Mobile number','09XX XXX XXXX','tel')+`<div class="field"><label>Payment method</label><select id="paymentMethod" required><option value="Cash">Cash</option><option value="QR Ph">QR Ph (scan to pay)</option></select></div><div class="field"><label>Tip for your rider (optional)</label><select id="riderTip"><option value="0">No tip</option><option value="10">₱10</option><option value="20">₱20</option><option value="50">₱50</option><option value="custom">Enter custom tip</option></select></div><div class="field" id="customTipWrap" style="display:none"><label>Custom tip amount (₱)</label><input id="customTip" type="number" min="1" step="1" placeholder="e.g. 15"></div><div class="notice">Tips go to the rider and are separate from the ride fare. QR Ph is a demo option until a QR Ph-compatible payment provider is connected.</div>`,'Preview ride request'],
  verify:['Verify your account','Start a verification request. This prototype does not securely collect or verify identity documents.',field('Full name','Your full name')+field('Mobile number','09XX XXX XXXX','tel')+field('Email address','you@example.com','email')+field('Verification method','Government ID (handled securely in production)'),'Submit demo request'],
  partner:['Partner application','Choose the partner role you want to apply for.',`<div class="field"><label>Partner type</label><select required><option>Rider with own motorcycle</option><option>Rider using owner motorcycle</option><option>Motorcycle owner / rental provider</option></select></div>`+field('Full name','Your full name')+field('Mobile number','09XX XXX XXXX','tel'),'Preview application'],
@@ -265,13 +294,68 @@ function showModal(which){
  const c=configs[which]||configs.ride;title.textContent=c[0];desc.textContent=c[1];fields.innerHTML=c[2];submit.textContent=c[3];wrap.classList.add('open');
  wirePickupSearch();
  wireDestinationPicker();
+ if(which==='auth'){
+   const nameWrap=document.getElementById('authNameWrap');
+   if(nameWrap)nameWrap.style.display=authMode==='signup'?'grid':'none';
+   const phone=document.getElementById('authPhone');if(phone)phone.style.display=authMode==='signup'?'':'none';
+   const sw=document.getElementById('authSwitch');if(sw)sw.textContent=authMode==='signin'?'Need an account? Create one':'Already registered? Sign in';
+   submit.textContent=authMode==='signin'?'Sign in':'Create account';
+ }
  const tipSelect=document.getElementById('riderTip');
  if(tipSelect){tipSelect.addEventListener('change',()=>{const custom=document.getElementById('customTipWrap');if(custom)custom.style.display=tipSelect.value==='custom'?'grid':'none';});}
 }
 function closeModal(){wrap.classList.remove('open')}
 wrap.addEventListener('click',e=>{if(e.target===wrap)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-document.getElementById('modalForm').addEventListener('submit',e=>{e.preventDefault();let msg='Demo only — no booking, verification, payment, or driver dispatch has been sent.';if(mode==='ride'){const method=document.getElementById('paymentMethod')?.value||'Cash';let tip=document.getElementById('riderTip')?.value||'0';if(tip==='custom'){tip=document.getElementById('customTip')?.value||'0';}msg='Ride request preview created. Payment: '+method+'. Rider tip: ₱'+Number(tip||0).toFixed(2)+'. Tips are separate from the fare and assigned to the rider. In a live app, a verified rider would be matched and payment securely processed.';addBooking('Pasundo ride','Payment: '+method+' · Tip: ₱'+Number(tip||0).toFixed(2));}else if(mode==='rental'){const method=document.getElementById('paymentMethod')?.value||'Cash';msg='Rental request preview created. Payment method: '+method+'. In a live app, the owner would confirm availability and payment would be processed securely.';addBooking('MotoRent · '+(selectedRental?.name||'Motorcycle'),'Payment: '+method+' · Request preview');}else if(mode==='partner'){msg='Partner application preview completed. Admin review and document verification are required before activation.'}else if(mode==='verify'){msg='Verification flow previewed. Connect a secure verification provider before collecting real identity data.'}result.textContent=msg;result.classList.add('show');});
+document.getElementById('modalForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(mode==='auth'){
+   if(!supabaseClient){result.textContent='Supabase is not configured yet. Add your project URL and anon key in config.js, then reload.';result.classList.add('show');return}
+   const email=document.getElementById('authEmail')?.value.trim(),password=document.getElementById('authPassword')?.value;
+   const fullName=document.getElementById('authFullName')?.value.trim()||'',phone=document.getElementById('authPhone')?.value.trim()||'';
+   submit.disabled=true;submit.textContent='Please wait…';
+   try{
+     if(authMode==='signup'){
+       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:fullName,phone}}});
+       if(error)throw error;
+       if(data.session){currentUser=data.user;result.textContent='Account created and signed in. You can now submit bookings.'}
+       else result.textContent='Account created. Check your email to confirm your account, then sign in.';
+     }else{
+       const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+       if(error)throw error;currentUser=data.user;result.textContent='Signed in successfully. Your bookings will load in My bookings.';
+     }
+     result.classList.add('show');refreshAccountUI();if(currentUser)await loadMyBookings();
+   }catch(err){result.textContent=err.message||'Could not complete sign-in. Please check your details.';result.classList.add('show')}
+   finally{submit.disabled=false;submit.textContent=authMode==='signin'?'Sign in':'Create account'}
+   return;
+ }
+ let msg='Demo only — no booking, verification, payment, or driver dispatch has been sent.';
+ let bookingPayload=null;
+ if(mode==='ride'){
+   const method=document.getElementById('paymentMethod')?.value||'Cash';let tip=document.getElementById('riderTip')?.value||'0';if(tip==='custom')tip=document.getElementById('customTip')?.value||'0';
+   const pickup=document.getElementById('pickupLocation'),destination=document.getElementById('destinationLocation'),phone=document.querySelector('#modalFields input[type="tel"]');
+   bookingPayload={booking_type:'pasundo',pickup_address:pickup?.value||null,pickup_lat:pickup?.dataset.lat?Number(pickup.dataset.lat):null,pickup_lng:pickup?.dataset.lng?Number(pickup.dataset.lng):null,destination_address:destination?.value||null,destination_lat:destination?.dataset.lat?Number(destination.dataset.lat):null,destination_lng:destination?.dataset.lng?Number(destination.dataset.lng):null,customer_phone:phone?.value||'',payment_method:method,rider_tip:Number(tip||0)};
+   msg='Ride request preview created. Payment: '+method+'. Rider tip: ₱'+Number(tip||0).toFixed(2)+'.';
+ }else if(mode==='rental'){
+   const method=document.getElementById('paymentMethod')?.value||'Cash';
+   const dates=[...document.querySelectorAll('#modalFields input[type="date"]')],phone=document.querySelector('#modalFields input[type="tel"]');
+   bookingPayload={booking_type:'motorcycle_rental',motorcycle_name:selectedRental?.name||'Motorcycle',start_date:dates[0]?.value||null,return_date:dates[1]?.value||null,customer_phone:phone?.value||'',payment_method:method};
+   msg='Rental request preview created. Payment method: '+method+'.';
+ }else if(mode==='partner'){msg='Partner application preview completed. Admin review and document verification are required before activation.'}
+ else if(mode==='verify'){msg='Verification flow previewed. Connect a secure verification provider before collecting real identity data.'}
+ if(bookingPayload){
+   if(!supabaseClient){msg+=' Supabase is not configured yet, so this request was not saved online.'}
+   else if(!currentUser){msg+=' Please sign in first; your request has not been saved.'}
+   else{
+     const {error}=await supabaseClient.from('bookings').insert({...bookingPayload,customer_id:currentUser.id});
+     if(error){msg+=' Could not save online: '+error.message}
+     else{msg='Booking request saved to your account. Status: pending. Payment is not processed by this prototype.';await loadMyBookings();}
+   }
+   if(mode==='ride')addBooking('Pasundo ride','Payment: '+bookingPayload.payment_method+' · '+(currentUser?'Booking submitted':'Not saved — sign in required'));
+   if(mode==='rental')addBooking('MotoRent · '+(selectedRental?.name||'Motorcycle'),'Payment: '+bookingPayload.payment_method+' · Request');
+ }
+ result.textContent=msg;result.classList.add('show');
+});
 function addBooking(name,status){const box=document.getElementById('bookingList');if(box.querySelector('p'))box.innerHTML='';const row=document.createElement('div');row.className='trip';row.innerHTML=`<div class="trip-icon">🛵</div><div><strong></strong><small></small></div><span class="price">Demo</span>`;row.querySelector('strong').textContent=name;row.querySelector('small').textContent=status;box.prepend(row)}
 function rent(name,price){selectedRental={name,price};showModal('rental')}
 document.getElementById('quickRide').addEventListener('submit',e=>{e.preventDefault();showModal('ride')});
