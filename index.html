@@ -87,7 +87,7 @@ main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:spa
 <main>
 <header class="topbar">
   <div class="location">YOUR LOCATION <b>📍 Ligao City, Albay <span style="color:#16835f;font-size:11px">●</span></b></div>
-  <div class="top-actions"><button class="icon-btn" aria-label="Notifications" onclick="showModal('notifications')">♧</button><button class="icon-btn" aria-label="Help" onclick="showModal('help')">?</button><button class="avatar" id="accountButton" type="button" aria-label="Sign in or view account" onclick="showModal('auth')">J</button></div>
+  <div class="top-actions"><button class="btn btn-light" id="topLogoutButton" type="button" onclick="logoutUser()" style="padding:10px 12px">Log out</button><button class="icon-btn" aria-label="Notifications" onclick="showModal('notifications')">♧</button><button class="icon-btn" aria-label="Help" onclick="showModal('help')">?</button><button class="avatar" id="accountButton" type="button" aria-label="Sign in or view account" onclick="showModal('auth')">J</button></div>
 </header>
 <section class="page active" id="page-home">
   <div class="hero"><div class="hero-copy"><div class="eyebrow">ARANGKADA NA, LIGAO!</div><h1>Your ride.<br>Your way.</h1><p>Book a ride with a driver or rent a motorcycle and explore on your own.</p><button class="btn btn-primary" onclick="showModal('ride')">Book a ride&nbsp; →</button></div><div class="hero-art">🏍</div></div>
@@ -128,7 +128,7 @@ main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:spa
 </section>
 <section class="page" id="page-bookings"><h1 class="page-title">My bookings</h1><p class="page-sub">Your ride and rental requests in one place.</p><div id="bookingList" class="panel"><p style="color:#777;font-size:13px">No bookings yet. Choose Pasundo or MotoRent to get started.</p></div></section>
 <section class="page" id="page-wallet"><h1 class="page-title">Wallet & earnings</h1><p class="page-sub">A simple overview of your activity.</p><div class="quick-grid"><div class="panel"><p style="font-size:12px;color:#777">Demo wallet balance</p><h2 style="font-size:34px;margin:8px 0">₱0.00</h2><p style="font-size:12px;color:#777">Cash and QR Ph are planned payment options; real payments and payouts are not connected yet. Rider tips will be recorded separately from fare and platform commission.</p></div><div class="panel"><h3>For riders & owners</h3><p style="font-size:13px;color:#777;line-height:1.6">Approved partners will see trip income, platform commission, owner share, payout status, and transaction history here.</p><button class="btn btn-primary" onclick="showModal('partner')">Apply as partner</button></div></div></section>
-<section class="page" id="page-profile"><h1 class="page-title">My account</h1><p class="page-sub">Manage your details and verification status.</p><div class="profile-card"><div class="profile-big">👤</div><div><h3>Guest user</h3><p>Sign in to book and manage trips.</p></div><span class="status">Not verified</span></div><div class="panel"><div class="setting-row"><span>Personal information</span><span>›</span></div><div class="setting-row"><span>Identity verification</span><span>Pending setup</span></div><div class="setting-row"><span>My bookings</span><span>›</span></div><div class="setting-row"><span>Help & support</span><span>›</span></div><div class="setting-row"><span>Privacy & safety</span><span>›</span></div><button class="btn btn-primary" style="margin-top:16px" onclick="showModal('verify')">Start account verification</button></div><div class="notice">Verification in this prototype is a demonstration only. Do not upload real IDs or sensitive personal data to this standalone demo.</div></section>
+<section class="page" id="page-profile"><h1 class="page-title">My account</h1><p class="page-sub">Manage your details and verification status.</p><div class="profile-card"><div class="profile-big">👤</div><div><h3>Guest user</h3><p>Sign in to book and manage trips.</p></div><span class="status">Not verified</span></div><div class="panel"><div class="setting-row"><span>Personal information</span><span>›</span></div><div class="setting-row"><span>Identity verification</span><span>Pending setup</span></div><div class="setting-row"><span>My bookings</span><span>›</span></div><div class="setting-row"><span>Help & support</span><span>›</span></div><div class="setting-row"><span>Privacy & safety</span><span>›</span></div><button class="btn btn-primary" style="margin-top:16px" onclick="showModal('verify')">Start account verification</button><button class="btn btn-light" id="logoutButton" type="button" style="margin-top:10px;width:100%;border-color:#e8caca;color:#a32929" onclick="logoutUser()">Log out</button></div><div class="notice">Verification in this prototype is a demonstration only. Do not upload real IDs or sensitive personal data to this standalone demo.</div></section>
 <nav class="mobile-nav"><button class="active" data-page="home"><span>⌂</span>Home</button><button data-page="rentals"><span>🏍</span>Rentals</button><button data-page="bookings"><span>▣</span>Bookings</button><button data-page="wallet"><span>▤</span>Wallet</button><button data-page="profile"><span>◉</span>Profile</button></nav>
 </main>
 </div>
@@ -159,7 +159,30 @@ function setAuthGate(isAuthenticated){
 function refreshAccountUI(){
  const b=document.getElementById('accountButton');
  if(b)b.textContent=currentUser?(currentUser.user_metadata?.full_name||currentUser.email||'U').trim().charAt(0).toUpperCase():'J';
+ const topLogout=document.getElementById('topLogoutButton');
+ if(topLogout)topLogout.style.display=currentUser?'inline-flex':'none';
+ const profileLogout=document.getElementById('logoutButton');
+ if(profileLogout)profileLogout.style.display=currentUser?'block':'none';
 }
+async function logoutUser(){
+ if(!supabaseClient){showToast('Authentication service is not configured.');return}
+ const buttons=[document.getElementById('logoutButton'),document.getElementById('topLogoutButton')].filter(Boolean);
+ buttons.forEach(b=>{b.disabled=true;b.textContent='Signing out…'});
+ try{
+   const {error}=await supabaseClient.auth.signOut();
+   if(error)throw error;
+   currentUser=null;
+   setAuthGate(false);
+   refreshAccountUI();
+   closeModal();
+   window.scrollTo({top:0,behavior:'smooth'});
+ }catch(err){
+   showToast('Could not sign out: '+(err?.message||'Please try again.'));
+ }finally{
+   buttons.forEach(b=>{b.disabled=false;b.textContent='Log out'});
+ }
+}
+
 function showAuth(mode='signin'){
  authMode=mode;showModal('auth');
  const switcher=document.getElementById('authSwitch');
