@@ -257,9 +257,20 @@ function wireDestinationPicker(){
      destinationLeafletMarker=L.marker(center,{draggable:true}).addTo(destinationLeafletMap);
      const setPoint=async(lat,lon)=>{
        destinationSelectedPlace={lat,lng:lon,address:`Map pin (${lat.toFixed(5)}, ${lon.toFixed(5)})`};
+       input.dataset.lat=lat;
+       input.dataset.lng=lon;
+       input.value=destinationSelectedPlace.address;
        status.textContent='Looking up selected map location…';
-       try{const p=await osmReverse(lat,lon);destinationSelectedPlace.address=p.display_name||destinationSelectedPlace.address;status.textContent='Map point selected: '+destinationSelectedPlace.address}
-       catch(err){status.textContent='Map point selected. Coordinates will be saved.'}
+       try{
+         const p=await osmReverse(lat,lon);
+         destinationSelectedPlace.address=p.display_name||destinationSelectedPlace.address;
+         input.value=destinationSelectedPlace.address;
+         input.dataset.lat=lat;
+         input.dataset.lng=lon;
+         status.textContent='Destination filled automatically from your map pin.';
+       }catch(err){
+         status.textContent='Destination filled with map coordinates. You can continue without typing an address.';
+       }
      };
      destinationLeafletMap.on('click',e=>{destinationLeafletMarker.setLatLng(e.latlng);setPoint(e.latlng.lat,e.latlng.lng)});
      destinationLeafletMarker.on('dragend',e=>{const p=e.target.getLatLng();setPoint(p.lat,p.lng)});
@@ -276,7 +287,7 @@ function wireDestinationPicker(){
  canvas.addEventListener('click',choosePoint);
  canvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const rect=canvas.getBoundingClientRect();choosePoint({clientX:rect.left+rect.width/2,clientY:rect.top+rect.height/2})}});
  document.getElementById('confirmDestinationMap')?.addEventListener('click',()=>{
-   if(destinationSelectedPlace){input.value=destinationSelectedPlace.address;input.dataset.lat=destinationSelectedPlace.lat;input.dataset.lng=destinationSelectedPlace.lng;status.textContent='Destination saved: '+destinationSelectedPlace.address;mapBox.style.display='none';return}
+   if(destinationSelectedPlace){input.value=destinationSelectedPlace.address;input.dataset.lat=destinationSelectedPlace.lat;input.dataset.lng=destinationSelectedPlace.lng;status.textContent='Destination saved automatically from your map pin.';mapBox.style.display='none';return}
    if(!pointChosen){status.textContent='Tap the map to place a destination pin first.';return}
    input.value='Map pin selected (demo point '+canvas.dataset.x+'%, '+canvas.dataset.y+'%)';status.textContent='Demo point selected; no real coordinates available.';mapBox.style.display='none';
  });
