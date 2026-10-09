@@ -387,7 +387,7 @@ document.getElementById('modalForm').addEventListener('submit',async e=>{
    submit.disabled=true;submit.textContent='Please wait…';
    try{
      if(authMode==='signup'){
-       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:fullName,phone}}});
+       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:'https://cjpmalinis.github.io/ligaoride/',data:{full_name:fullName,phone}}});
        if(error)throw error;
        if(data.session){currentUser=data.user;result.textContent='Account created and signed in. You can now submit bookings.'}
        else result.textContent='Account created. Check your email to confirm your account, then sign in.';
