@@ -111,6 +111,7 @@ main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:spa
 <nav class="mobile-nav"><button class="active" data-page="home"><span>⌂</span>Home</button><button data-page="rentals"><span>🏍</span>Rentals</button><button data-page="bookings"><span>▣</span>Bookings</button><button data-page="wallet"><span>▤</span>Wallet</button><button data-page="profile"><span>◉</span>Profile</button></nav>
 </main>
 </div>
+<div id="appToast" role="status" aria-live="polite" style="display:none;position:fixed;right:20px;bottom:20px;z-index:50;max-width:min(420px,calc(100vw - 40px));background:#171717;color:#fff;padding:14px 18px;border-radius:14px;box-shadow:0 12px 36px #0003;font-size:13px;line-height:1.5"></div>
 <div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Book a ride</h2><button class="close" onclick="closeModal()" aria-label="Close">✕</button></div><p id="modalDesc">Enter your trip details to preview a booking request.</p><form class="modal-form" id="modalForm"><div id="modalFields"></div><button class="btn btn-primary" type="submit" id="modalSubmit">Continue</button></form><div class="result" id="modalResult"></div></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -142,7 +143,7 @@ function showAuth(mode='signin'){
 async function loadMyBookings(){
  if(!supabaseClient||!currentUser)return;
  const box=document.getElementById('bookingList');if(!box)return;
- const {data,error}=await supabaseClient.from('bookings').select('*').order('created_at',{ascending:false}).limit(50);
+ const {data,error}=await supabaseClient.from('bookings').select('*').eq('customer_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
  if(error){console.error(error);return}
  box.innerHTML='';
  if(!data?.length){box.innerHTML='<p style="color:#777;font-size:13px">No bookings yet. Choose Pasundo or MotoRent to get started.</p>';return}
@@ -305,6 +306,15 @@ function showModal(which){
  if(tipSelect){tipSelect.addEventListener('change',()=>{const custom=document.getElementById('customTipWrap');if(custom)custom.style.display=tipSelect.value==='custom'?'grid':'none';});}
 }
 function closeModal(){wrap.classList.remove('open')}
+let toastTimer=null;
+function showToast(message){
+  const toast=document.getElementById('appToast');
+  if(!toast)return;
+  toast.textContent=message;
+  toast.style.display='block';
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{toast.style.display='none'},5000);
+}
 wrap.addEventListener('click',e=>{if(e.target===wrap)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 document.getElementById('modalForm').addEventListener('submit',async e=>{
@@ -344,15 +354,33 @@ document.getElementById('modalForm').addEventListener('submit',async e=>{
  }else if(mode==='partner'){msg='Partner application preview completed. Admin review and document verification are required before activation.'}
  else if(mode==='verify'){msg='Verification flow previewed. Connect a secure verification provider before collecting real identity data.'}
  if(bookingPayload){
-   if(!supabaseClient){msg+=' Supabase is not configured yet, so this request was not saved online.'}
-   else if(!currentUser){msg+=' Please sign in first; your request has not been saved.'}
-   else{
-     const {error}=await supabaseClient.from('bookings').insert({...bookingPayload,customer_id:currentUser.id});
-     if(error){msg+=' Could not save online: '+error.message}
-     else{msg='Booking request saved to your account. Status: pending. Payment is not processed by this prototype.';await loadMyBookings();}
+   if(!supabaseClient){
+     msg='Supabase is not configured. This booking was not saved. Check config.js and reload the page.';
+   }else if(!currentUser){
+     msg='Please sign in first. This booking has not been saved.';
+   }else{
+     submit.disabled=true;
+     const originalSubmitText=submit.textContent;
+     submit.textContent='Saving booking…';
+     try{
+       const {data,error}=await supabaseClient.from('bookings')
+         .insert({...bookingPayload,customer_id:currentUser.id})
+         .select('id,status')
+         .single();
+       if(error)throw error;
+       await loadMyBookings();
+       closeModal();
+       showToast('Booking request saved successfully. Status: '+(data?.status||'pending')+'. You can view it in My bookings.');
+       submit.disabled=false;
+       submit.textContent=originalSubmitText;
+       return;
+     }catch(err){
+       msg='Could not save your booking: '+(err?.message||'Unknown error')+'. Your request was not confirmed. Please try again.';
+     }finally{
+       submit.disabled=false;
+       submit.textContent=originalSubmitText;
+     }
    }
-   if(mode==='ride')addBooking('Pasundo ride','Payment: '+bookingPayload.payment_method+' · '+(currentUser?'Booking submitted':'Not saved — sign in required'));
-   if(mode==='rental')addBooking('MotoRent · '+(selectedRental?.name||'Motorcycle'),'Payment: '+bookingPayload.payment_method+' · Request');
  }
  result.textContent=msg;result.classList.add('show');
 });
