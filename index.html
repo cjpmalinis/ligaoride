@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6bd20">
+<title>LIGAO RIDE — Your ride. Your way.</title>
+<style>
+:root{--yellow:#f6bd20;--ink:#171717;--muted:#777;--line:#ececec;--paper:#fff;--soft:#f7f7f5;--green:#14835f}
+*{box-sizing:border-box}body{margin:0;background:#f4f4f1;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;border:0}a{color:inherit;text-decoration:none}
+.app{max-width:1180px;margin:auto;min-height:100vh;background:var(--paper);display:grid;grid-template-columns:240px 1fr;box-shadow:0 0 40px #00000008}
+.sidebar{border-right:1px solid var(--line);padding:28px 18px;display:flex;flex-direction:column;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px}.logo{width:44px;height:44px;border-radius:14px;background:var(--yellow);display:grid;place-items:center;font-size:25px}.brand b{font-size:18px;letter-spacing:-.8px;line-height:1.05}.brand small{display:block;font-size:10px;letter-spacing:2px;margin-top:4px;color:#777}
+.nav{display:grid;gap:6px}.nav button{background:transparent;text-align:left;padding:13px 14px;border-radius:12px;color:#626262;display:flex;gap:12px;align-items:center;font-size:14px}.nav button.active,.nav button:hover{background:#fff6d8;color:#171717;font-weight:650}.nav .ico{width:20px;text-align:center;font-size:17px}
+.side-bottom{margin-top:auto;background:#fff8df;border-radius:16px;padding:16px;font-size:12px;color:#6d5b22;line-height:1.5}.side-bottom b{display:block;color:#29220d;margin-bottom:5px}
+main{min-width:0;padding:26px 34px 36px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:30px}.location{font-size:12px;color:var(--muted)}.location b{display:block;color:#222;font-size:14px;margin-top:3px}.top-actions{display:flex;align-items:center;gap:10px}.icon-btn{width:40px;height:40px;border:1px solid var(--line);border-radius:13px;background:#fff}.avatar{width:40px;height:40px;border-radius:50%;background:#f4d879;display:grid;place-items:center;font-weight:700}
+.hero{background:#171717;color:#fff;border-radius:24px;padding:30px;position:relative;overflow:hidden;min-height:218px;display:flex;align-items:center}.hero:after{content:"";position:absolute;right:7%;top:-40px;width:260px;height:260px;border-radius:50%;background:var(--yellow);opacity:.13}.hero-copy{position:relative;z-index:1;max-width:450px}.eyebrow{color:var(--yellow);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}.hero h1{font-size:clamp(29px,4vw,43px);letter-spacing:-1.8px;line-height:1.05;margin:12px 0}.hero p{color:#c7c7c7;font-size:14px;line-height:1.6;max-width:340px;margin:0 0 20px}.btn{border-radius:12px;padding:12px 17px;font-weight:750;font-size:13px;transition:.15s}.btn-primary{background:var(--yellow);color:#171717}.btn-primary:hover{background:#ffd34e;transform:translateY(-1px)}.btn-light{background:#fff;border:1px solid var(--line)}.hero-art{position:absolute;right:7%;bottom:-8px;font-size:130px;filter:grayscale(1);opacity:.9;transform:rotate(-8deg)}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:28px 0 14px}.section-head h2{font-size:19px;letter-spacing:-.5px;margin:0}.section-head p{font-size:12px;color:var(--muted);margin:5px 0 0}.text-btn{background:transparent;color:#806000;font-weight:700;font-size:12px}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:14px}.service{border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;align-items:center;gap:16px;text-align:left;background:#fff;min-height:128px;transition:.18s}.service:hover{border-color:#e4b01b;box-shadow:0 8px 24px #00000008;transform:translateY(-2px)}.service.primary{background:#fff8df;border-color:#f7e4a0}.service-icon{height:54px;width:54px;flex:none;display:grid;place-items:center;background:#f4f4f2;border-radius:16px;font-size:27px}.service.primary .service-icon{background:var(--yellow)}.service h3{font-size:16px;margin:0 0 5px}.service p{font-size:12px;color:#777;margin:0;line-height:1.5}.service .arrow{margin-left:auto;font-size:22px}
+.quick-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.panel{border:1px solid var(--line);border-radius:18px;padding:18px}.panel h3{font-size:15px;margin:0 0 14px}.route-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field label{font-size:11px;color:#777;font-weight:650}.field input,.field select{width:100%;padding:12px;border:1px solid #e7e7e7;border-radius:11px;background:#fff;outline:none;font-size:13px}.field input:focus,.field select:focus{border-color:#e6b21b;box-shadow:0 0 0 3px #f6bd2020}.field.full{grid-column:1/-1}.route-form .btn{grid-column:1/-1;margin-top:3px}
+.trips{display:grid;gap:10px}.trip{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:#fafaf8}.trip-icon{width:40px;height:40px;border-radius:12px;background:#fff0bf;display:grid;place-items:center;font-size:19px}.trip strong{font-size:12px;display:block}.trip small{font-size:11px;color:#777}.trip .price{margin-left:auto;font-size:12px;font-weight:800}
+.page{display:none}.page.active{display:block}.page-title{font-size:27px;letter-spacing:-1px;margin:0 0 6px}.page-sub{font-size:13px;color:#777;margin:0 0 22px}.rental-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.rental{border:1px solid var(--line);border-radius:17px;overflow:hidden}.bike-art{height:135px;background:linear-gradient(140deg,#f8f8f4,#eee);display:grid;place-items:center;font-size:66px}.rental-body{padding:14px}.rental h3{font-size:14px;margin:0 0 5px}.rental p{font-size:11px;color:#777;margin:0 0 12px}.rental-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.rental-bottom b{font-size:14px}.rental-bottom small{font-size:10px;color:#777}.tag{font-size:10px;color:var(--green);background:#e9f7f0;border-radius:6px;padding:5px 7px;display:inline-block;margin-bottom:10px}
+.profile-card{display:flex;align-items:center;gap:16px;border:1px solid var(--line);padding:20px;border-radius:18px;margin-bottom:15px}.profile-big{width:60px;height:60px;border-radius:20px;background:#fff0bd;display:grid;place-items:center;font-size:28px}.profile-card h3{margin:0 0 4px}.profile-card p{margin:0;color:#777;font-size:12px}.status{font-size:11px;color:#987000;background:#fff3c8;border-radius:20px;padding:7px 10px;margin-left:auto}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--line);font-size:13px}.setting-row span:last-child{color:#888}
+.notice{margin-top:22px;border-radius:14px;padding:14px 16px;background:#f7f7f4;color:#666;font-size:11px;line-height:1.55}
+.modal-wrap{position:fixed;inset:0;background:#1119;display:none;place-items:center;padding:18px;z-index:20}.modal-wrap.open{display:grid}.modal{background:white;width:min(440px,100%);border-radius:22px;padding:25px;box-shadow:0 24px 90px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal h2{font-size:22px;letter-spacing:-.7px;margin:0}.close{background:#f4f4f1;border-radius:10px;width:35px;height:35px}.modal p{font-size:12px;color:#777;line-height:1.6}.modal-form{display:grid;gap:12px;margin-top:18px}.modal-form .btn{width:100%}.result{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#e9f7f0;color:#126648;font-size:12px;line-height:1.5}.result.show{display:block}.mobile-nav{display:none}
+
+.location-search-wrap{position:relative}
+.location-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.location-actions .btn{font-size:11px;padding:9px 11px}
+.location-status{font-size:11px;color:#777;margin-top:6px;line-height:1.45}
+.location-results{display:none;position:absolute;z-index:15;top:100%;left:0;right:0;background:#fff;border:1px solid #e7e7e7;border-radius:12px;box-shadow:0 12px 28px #00000014;overflow:hidden;margin-top:5px}
+.location-results.show{display:block}
+.location-result{display:block;width:100%;text-align:left;background:#fff;padding:11px 13px;border-bottom:1px solid #f1f1f1;font-size:12px}
+.location-result:last-child{border-bottom:0}.location-result:hover{background:#fff8df}
+.location-result small{display:block;color:#888;margin-top:3px}
+
+
+.map-live-canvas{height:240px;width:100%;background:#eef1e8;display:none}.map-live-canvas.ready{display:block}.map-preview.demo-map{display:block}.map-picker{border:1px solid #e8e8e8;border-radius:14px;overflow:hidden;background:#f6f6f2;margin-top:8px}
+.map-picker-head{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #eee;font-size:12px;font-weight:700}
+.map-preview{height:180px;position:relative;overflow:hidden;background-color:#eef1e8;background-image:linear-gradient(30deg,transparent 47%,#fff 48%,#fff 51%,transparent 52%),linear-gradient(120deg,transparent 44%,#fff 45%,#fff 49%,transparent 50%),linear-gradient(5deg,transparent 47%,#d8e2d0 48%,#d8e2d0 52%,transparent 53%);background-size:85px 72px,110px 90px,140px 100px;cursor:crosshair}
+.map-preview:before,.map-preview:after{content:"";position:absolute;background:#d9e8f7;opacity:.9;transform:rotate(-20deg);border-radius:50%}
+.map-preview:before{width:220px;height:22px;left:20%;top:45%}.map-preview:after{width:130px;height:14px;left:52%;top:20%;transform:rotate(55deg)}
+.map-pin{position:absolute;left:50%;top:47%;transform:translate(-50%,-100%);font-size:28px;filter:drop-shadow(0 2px 2px #0003);pointer-events:none}
+.map-hint{position:absolute;left:10px;bottom:10px;background:#fff;border-radius:8px;padding:7px 9px;font-size:10px;box-shadow:0 2px 8px #0001}
+.map-footer{padding:10px 12px;background:#fff;font-size:11px;color:#777;line-height:1.45}
+
+@media(max-width:850px){.app{grid-template-columns:1fr}.sidebar{display:none}main{padding:20px 18px 90px}.mobile-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:10}.mobile-nav button{background:transparent;color:#777;font-size:10px;display:grid;justify-items:center;gap:3px;padding:4px}.mobile-nav button.active{color:#8b6800;font-weight:800}.mobile-nav span{font-size:19px}.hero-art{right:1%;font-size:90px;opacity:.5}.hero{padding:24px;min-height:220px}.quick-grid{grid-template-columns:1fr}.rental-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{margin-bottom:20px}}
+@media(max-width:480px){.services{grid-template-columns:1fr}.service{min-height:100px;padding:15px}.route-form{grid-template-columns:1fr}.field.full{grid-column:auto}.route-form .btn{grid-column:auto}.rental-grid{grid-template-columns:1fr 1fr;gap:9px}.bike-art{height:105px;font-size:50px}.rental-body{padding:11px}.rental-bottom{align-items:flex-start;flex-direction:column}.hero h1{font-size:32px}.hero-art{right:-15px;bottom:-5px}.topbar{align-items:flex-start}.location b{max-width:200px}.panel{padding:14px}}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">🏍</div><div><b>LIGAO RIDE</b><small>YOUR RIDE. YOUR WAY.</small></div></div>
+  <nav class="nav" aria-label="Main navigation">
+    <button class="active" data-page="home"><span class="ico">⌂</span>Home</button>
+    <button data-page="rentals"><span class="ico">🏍</span>Motorcycle rental</button>
+    <button data-page="bookings"><span class="ico">▣</span>My bookings</button>
+    <button data-page="wallet"><span class="ico">▤</span>Wallet & earnings</button>
+    <button data-page="profile"><span class="ico">◉</span>My account</button>
+  </nav>
+  <div class="side-bottom"><b>📍 Local rides, made easy</b>Starting in Ligao City and nearby towns. Ride safe, ride verified.</div>
+</aside>
+<main>
+<header class="topbar">
+  <div class="location">YOUR LOCATION <b>📍 Ligao City, Albay <span style="color:#16835f;font-size:11px">●</span></b></div>
+  <div class="top-actions"><button class="icon-btn" aria-label="Notifications" onclick="showModal('notifications')">♧</button><button class="icon-btn" aria-label="Help" onclick="showModal('help')">?</button><div class="avatar">J</div></div>
+</header>
+<section class="page active" id="page-home">
+  <div class="hero"><div class="hero-copy"><div class="eyebrow">ARANGKADA NA, LIGAO!</div><h1>Your ride.<br>Your way.</h1><p>Book a ride with a driver or rent a motorcycle and explore on your own.</p><button class="btn btn-primary" onclick="showModal('ride')">Book a ride&nbsp; →</button></div><div class="hero-art">🏍</div></div>
+  <div class="section-head"><div><h2>How are you riding today?</h2><p>Choose the service that fits your trip.</p></div></div>
+  <div class="services">
+    <button class="service primary" onclick="showModal('ride')"><div class="service-icon">🛵</div><div><h3>Pasundo</h3><p>Ride with a verified driver<br>Get picked up and go.</p></div><span class="arrow">↗</span></button>
+    <button class="service" onclick="go('rentals')"><div class="service-icon">🔑</div><div><h3>MotoRent</h3><p>Self-drive motorcycle rental<br>Find your ride by the day.</p></div><span class="arrow">↗</span></button>
+  </div>
+  <div class="section-head"><div><h2>Quick booking</h2><p>Plan your next trip in a few taps.</p></div></div>
+  <div class="quick-grid">
+    <div class="panel"><h3>Where do you want to go?</h3><form class="route-form" id="quickRide">
+      <div class="field full"><label>Pickup location</label><input required placeholder="e.g. Ligao City Public Market"></div>
+      <div class="field full"><label>Destination</label><input required placeholder="e.g. Ligao City Hall"></div>
+      <div class="field"><label>Ride type</label><select><option>Motorcycle with driver</option><option>Schedule for later</option></select></div>
+      <div class="field"><label>Passengers</label><select><option>1 passenger</option><option>2 passengers (subject to legal limits)</option></select></div>
+      <button class="btn btn-primary" type="submit">Find a ride →</button>
+    </form></div>
+    <div class="panel"><h3>Popular nearby trips</h3><div class="trips">
+      <div class="trip"><div class="trip-icon">🏛</div><div><strong>Ligao City Hall</strong><small>Local destination</small></div><span class="price">Explore</span></div>
+      <div class="trip"><div class="trip-icon">🛍</div><div><strong>Public Market</strong><small>Shopping & errands</small></div><span class="price">Explore</span></div>
+      <div class="trip"><div class="trip-icon">🌋</div><div><strong>Nearby towns</strong><small>Subject to service area</small></div><span class="price">Explore</span></div>
+    </div></div>
+  </div>
+  <div class="notice">Safety first: use only approved and legally authorized transport services. Driver matching, live maps, payments, and account verification are demo features until connected to a production backend.</div>
+</section>
+<section class="page" id="page-rentals">
+  <h1 class="page-title">Find your motorcycle</h1><p class="page-sub">Flexible self-drive rentals from local owners.</p>
+  <div class="field" style="max-width:420px;margin-bottom:18px"><label>Search motorcycles</label><input id="rentalSearch" placeholder="Search by model or type…"></div>
+  <div class="rental-grid" id="rentalGrid">
+    <article class="rental" data-name="Honda Click 125 automatic scooter"><div class="bike-art">🛵</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>Honda Click 125</h3><p>Automatic · 2 helmets included</p><div class="rental-bottom"><div><b>₱300</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('Honda Click 125','300')">Details</button></div></div></article>
+    <article class="rental" data-name="Yamaha Mio automatic scooter"><div class="bike-art">🏍️</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>Yamaha Mio</h3><p>Automatic · Fuel efficient</p><div class="rental-bottom"><div><b>₱280</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('Yamaha Mio','280')">Details</button></div></div></article>
+    <article class="rental" data-name="Honda Beat automatic scooter"><div class="bike-art">🛵</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>Honda BeAT</h3><p>Automatic · Compact</p><div class="rental-bottom"><div><b>₱250</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('Honda BeAT','250')">Details</button></div></div></article>
+    <article class="rental" data-name="Suzuki Raider manual motorcycle"><div class="bike-art">🏍</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>Suzuki Raider</h3><p>Manual · Sporty ride</p><div class="rental-bottom"><div><b>₱400</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('Suzuki Raider','400')">Details</button></div></div></article>
+    <article class="rental" data-name="Honda XRM manual motorcycle"><div class="bike-art">🏍️</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>Honda XRM</h3><p>Manual · Everyday use</p><div class="rental-bottom"><div><b>₱320</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('Honda XRM','320')">Details</button></div></div></article>
+    <article class="rental" data-name="Scooter available nearby"><div class="bike-art">🛵</div><div class="rental-body"><span class="tag">✓ Verified owner</span><h3>City Scooter</h3><p>Automatic · Availability varies</p><div class="rental-bottom"><div><b>₱270</b> <small>/ day</small></div><button class="btn btn-primary" onclick="rent('City Scooter','270')">Details</button></div></div></article>
+  </div>
+  <div class="notice">Rental rates shown are sample demo prices, not live offers. A production rental must validate the renter's identity and valid motorcycle driver's license, confirm owner authority and insurance, and use a signed rental agreement.</div>
+</section>
+<section class="page" id="page-bookings"><h1 class="page-title">My bookings</h1><p class="page-sub">Your ride and rental requests in one place.</p><div id="bookingList" class="panel"><p style="color:#777;font-size:13px">No bookings yet. Choose Pasundo or MotoRent to get started.</p></div></section>
+<section class="page" id="page-wallet"><h1 class="page-title">Wallet & earnings</h1><p class="page-sub">A simple overview of your activity.</p><div class="quick-grid"><div class="panel"><p style="font-size:12px;color:#777">Demo wallet balance</p><h2 style="font-size:34px;margin:8px 0">₱0.00</h2><p style="font-size:12px;color:#777">Cash and QR Ph are planned payment options; real payments and payouts are not connected yet. Rider tips will be recorded separately from fare and platform commission.</p></div><div class="panel"><h3>For riders & owners</h3><p style="font-size:13px;color:#777;line-height:1.6">Approved partners will see trip income, platform commission, owner share, payout status, and transaction history here.</p><button class="btn btn-primary" onclick="showModal('partner')">Apply as partner</button></div></div></section>
+<section class="page" id="page-profile"><h1 class="page-title">My account</h1><p class="page-sub">Manage your details and verification status.</p><div class="profile-card"><div class="profile-big">👤</div><div><h3>Guest user</h3><p>Sign in to book and manage trips.</p></div><span class="status">Not verified</span></div><div class="panel"><div class="setting-row"><span>Personal information</span><span>›</span></div><div class="setting-row"><span>Identity verification</span><span>Pending setup</span></div><div class="setting-row"><span>My bookings</span><span>›</span></div><div class="setting-row"><span>Help & support</span><span>›</span></div><div class="setting-row"><span>Privacy & safety</span><span>›</span></div><button class="btn btn-primary" style="margin-top:16px" onclick="showModal('verify')">Start account verification</button></div><div class="notice">Verification in this prototype is a demonstration only. Do not upload real IDs or sensitive personal data to this standalone demo.</div></section>
+<nav class="mobile-nav"><button class="active" data-page="home"><span>⌂</span>Home</button><button data-page="rentals"><span>🏍</span>Rentals</button><button data-page="bookings"><span>▣</span>Bookings</button><button data-page="wallet"><span>▤</span>Wallet</button><button data-page="profile"><span>◉</span>Profile</button></nav>
+</main>
+</div>
+<div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Book a ride</h2><button class="close" onclick="closeModal()" aria-label="Close">✕</button></div><p id="modalDesc">Enter your trip details to preview a booking request.</p><form class="modal-form" id="modalForm"><div id="modalFields"></div><button class="btn btn-primary" type="submit" id="modalSubmit">Continue</button></form><div class="result" id="modalResult"></div></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+window.LIGAO_RIDE_CONFIG = { defaultCenter: { lat: 13.2167, lng: 123.5167 }, defaultZoom: 13 };
+</script>
+
+<script>
+const pages=['home','rentals','bookings','wallet','profile'];
+function go(name){pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+const wrap=document.getElementById('modalWrap'), title=document.getElementById('modalTitle'), desc=document.getElementById('modalDesc'), fields=document.getElementById('modalFields'), submit=document.getElementById('modalSubmit'), result=document.getElementById('modalResult');
+let mode='ride',selectedRental=null;
+function field(label,placeholder,type='text',required=true){return `<div class="field"><label>${label}</label><input ${required?'required':''} type="${type}" placeholder="${placeholder}"></div>`}
+
+const LIGAO_SUGGESTIONS = [
+ ["Ligao City Public Market","Public market · Ligao City, Albay"],
+ ["Ligao City Hall","Government office · Ligao City, Albay"],
+ ["St. Stephen the Protomartyr Parish","Church · Ligao City, Albay"],
+ ["Ligao Community College","College · Ligao City, Albay"],
+ ["Ligao City Gymnasium","Event venue · Ligao City, Albay"],
+ ["Oas, Albay","Nearby town · Albay"],
+ ["Polangui, Albay","Nearby town · Albay"],
+ ["Guinobatan, Albay","Nearby town · Albay"],
+ ["Camalig, Albay","Nearby town · Albay"],
+ ["Tabaco City, Albay","Nearby city · Albay"],
+ ["Legazpi City, Albay","Nearby city · Albay"]
+];
+async function osmSearch(query){
+ const url='https://nominatim.openstreetmap.org/search?format=jsonv2&country=Philippines&limit=5&q='+encodeURIComponent(query);
+ const res=await fetch(url,{headers:{'Accept':'application/json'}});
+ if(!res.ok) throw new Error('Place search is temporarily unavailable');
+ return await res.json();
+}
+async function osmReverse(lat,lon){
+ const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+ const res=await fetch(url,{headers:{'Accept':'application/json'}});
+ if(!res.ok) throw new Error('Address lookup is temporarily unavailable');
+ return await res.json();
+}
+function renderPlaceResults(input,results,status,places,kind){
+ results.innerHTML='';
+ if(!places.length){results.classList.remove('show');status.textContent='No matching places found. Try a nearby landmark or full address.';return}
+ places.forEach(p=>{
+   const b=document.createElement('button');b.type='button';b.className='location-result';
+   b.innerHTML='<span></span><small></small>';
+   b.querySelector('span').textContent='⌖ '+(p.name||p.display_name.split(',')[0]);
+   b.querySelector('small').textContent=p.display_name;
+   b.addEventListener('click',()=>{
+     input.value=p.display_name;input.dataset.lat=p.lat;input.dataset.lng=p.lon;
+     results.classList.remove('show');status.textContent=`${kind} selected: ${p.display_name}`;
+     if(kind==='Destination'){destinationSelectedPlace={lat:Number(p.lat),lng:Number(p.lon),address:p.display_name};}
+   });
+   results.appendChild(b);
+ });
+ results.classList.add('show');
+}
+function setupOSMPlaceSearch(input,results,status,kind){
+ if(!input||input.dataset.osmSearchReady)return;
+ input.dataset.osmSearchReady='true';
+ input.addEventListener('keydown',async e=>{
+   if(e.key!=='Enter')return;
+   e.preventDefault();
+   const q=input.value.trim();if(q.length<3){status.textContent='Enter at least 3 characters to search.';return}
+   status.textContent='Searching OpenStreetMap…';
+   try{const places=await osmSearch(q);renderPlaceResults(input,results,status,places,kind)}
+   catch(err){status.textContent='Place search is unavailable right now. You can still choose a saved local suggestion or use the map.'}
+ });
+}
+function wirePickupSearch(){
+ const input=document.getElementById('pickupLocation'), results=document.getElementById('pickupResults'), status=document.getElementById('pickupStatus'), current=document.getElementById('useCurrentLocation');
+ if(!input||!results||!current)return;
+ setupOSMPlaceSearch(input,results,status,'Pickup');
+ input.addEventListener('input',()=>{
+   if(input.dataset.osmBusy)return;
+   const q=input.value.trim().toLowerCase();results.innerHTML='';
+   if(!q){results.classList.remove('show');return}
+   const matches=LIGAO_SUGGESTIONS.filter(x=>(x[0]+' '+x[1]).toLowerCase().includes(q)).slice(0,6);
+   matches.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='location-result';b.innerHTML='<span></span><small></small>';b.querySelector('span').textContent='⌖ '+x[0];b.querySelector('small').textContent=x[1];b.addEventListener('click',()=>{input.value=x[0];results.classList.remove('show');status.textContent='Selected pickup: '+x[0]+'. Press Enter to search all places.'});results.appendChild(b)});
+   if(matches.length)results.classList.add('show');else results.classList.remove('show');
+ });
+ current.addEventListener('click',()=>{
+   if(!navigator.geolocation){status.textContent='Location is not supported by this browser. Please search for your pickup address.';return}
+   status.textContent='Finding your current location…';current.disabled=true;
+   navigator.geolocation.getCurrentPosition(async pos=>{
+     const lat=pos.coords.latitude,lon=pos.coords.longitude;input.dataset.lat=lat;input.dataset.lng=lon;
+     try{const p=await osmReverse(lat,lon);input.value=p.display_name||`Current location (${lat.toFixed(5)}, ${lon.toFixed(5)})`;status.textContent='Current pickup location selected.'}
+     catch(err){input.value=`Current location (${lat.toFixed(5)}, ${lon.toFixed(5)})`;status.textContent='GPS coordinates selected. Address lookup unavailable.'}
+     current.disabled=false;
+   },err=>{status.textContent=err.code===1?'Location permission was denied. Allow location access or search for an address.':'Could not get your location. Check GPS/location settings and try again.';current.disabled=false},{enableHighAccuracy:true,timeout:10000,maximumAge:30000});
+ });
+ document.addEventListener('click',e=>{if(!e.target.closest('.location-search-wrap'))results.classList.remove('show')});
+}
+let destinationLeafletMap=null,destinationLeafletMarker=null,destinationSelectedPlace=null;
+function wireDestinationPicker(){
+ const input=document.getElementById('destinationLocation'),results=document.getElementById('destinationResults'),status=document.getElementById('destinationStatus');
+ const openBtn=document.getElementById('pickDestinationMap'),mapBox=document.getElementById('destinationMapPicker'),canvas=document.getElementById('destinationMapCanvas'),liveMap=document.getElementById('destinationLiveMap');
+ if(!input||!results||!openBtn||!mapBox||!canvas)return;
+ setupOSMPlaceSearch(input,results,status,'Destination');
+ input.addEventListener('input',()=>{
+   const q=input.value.trim().toLowerCase();results.innerHTML='';
+   if(!q){results.classList.remove('show');return}
+   const matches=LIGAO_SUGGESTIONS.filter(x=>(x[0]+' '+x[1]).toLowerCase().includes(q)).slice(0,6);
+   matches.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='location-result';b.innerHTML='<span></span><small></small>';b.querySelector('span').textContent='⌖ '+x[0];b.querySelector('small').textContent=x[1];b.addEventListener('click',()=>{input.value=x[0];results.classList.remove('show');status.textContent='Selected destination: '+x[0]+'. Press Enter to search all places.'});results.appendChild(b)});
+   if(matches.length)results.classList.add('show');else results.classList.remove('show');
+ });
+ openBtn.addEventListener('click',()=>{
+   mapBox.style.display='block';mapBox.scrollIntoView({block:'nearest',behavior:'smooth'});
+   if(!window.L){status.textContent='Map library could not load. Check your internet connection.';return}
+   liveMap.classList.add('ready');canvas.style.display='none';
+   const center=[13.2167,123.5167];
+   if(!destinationLeafletMap){
+     destinationLeafletMap=L.map(liveMap).setView(center,13);
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(destinationLeafletMap);
+     destinationLeafletMarker=L.marker(center,{draggable:true}).addTo(destinationLeafletMap);
+     const setPoint=async(lat,lon)=>{
+       destinationSelectedPlace={lat,lng:lon,address:`Map pin (${lat.toFixed(5)}, ${lon.toFixed(5)})`};
+       status.textContent='Looking up selected map location…';
+       try{const p=await osmReverse(lat,lon);destinationSelectedPlace.address=p.display_name||destinationSelectedPlace.address;status.textContent='Map point selected: '+destinationSelectedPlace.address}
+       catch(err){status.textContent='Map point selected. Coordinates will be saved.'}
+     };
+     destinationLeafletMap.on('click',e=>{destinationLeafletMarker.setLatLng(e.latlng);setPoint(e.latlng.lat,e.latlng.lng)});
+     destinationLeafletMarker.on('dragend',e=>{const p=e.target.getLatLng();setPoint(p.lat,p.lng)});
+   }else{setTimeout(()=>destinationLeafletMap.invalidateSize(),100)}
+   status.textContent='Tap the map or drag the pin to choose a destination.';
+ });
+ document.getElementById('closeDestinationMap')?.addEventListener('click',()=>mapBox.style.display='none');
+ let pointChosen=false;
+ function choosePoint(e){
+   const rect=canvas.getBoundingClientRect(),x=Math.max(5,Math.min(95,((e.clientX-rect.left)/rect.width)*100)),y=Math.max(8,Math.min(88,((e.clientY-rect.top)/rect.height)*100));
+   const pin=canvas.querySelector('.map-pin');pin.style.left=x+'%';pin.style.top=y+'%';pointChosen=true;canvas.dataset.x=x.toFixed(1);canvas.dataset.y=y.toFixed(1);
+   document.getElementById('destinationMapNote').textContent='Demo point selected.';
+ }
+ canvas.addEventListener('click',choosePoint);
+ canvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const rect=canvas.getBoundingClientRect();choosePoint({clientX:rect.left+rect.width/2,clientY:rect.top+rect.height/2})}});
+ document.getElementById('confirmDestinationMap')?.addEventListener('click',()=>{
+   if(destinationSelectedPlace){input.value=destinationSelectedPlace.address;input.dataset.lat=destinationSelectedPlace.lat;input.dataset.lng=destinationSelectedPlace.lng;status.textContent='Destination saved: '+destinationSelectedPlace.address;mapBox.style.display='none';return}
+   if(!pointChosen){status.textContent='Tap the map to place a destination pin first.';return}
+   input.value='Map pin selected (demo point '+canvas.dataset.x+'%, '+canvas.dataset.y+'%)';status.textContent='Demo point selected; no real coordinates available.';mapBox.style.display='none';
+ });
+}
+function showModal(which){
+ mode=which;result.classList.remove('show');result.textContent='';
+ const configs={
+ ride:['Book a Pasundo ride','Tell us where to pick you up and where you are going. Choose CASH or QR Ph and optionally add a tip for your rider.',`<div class="field location-search-wrap"><label>Pickup location</label><input id="pickupLocation" required autocomplete="off" placeholder="Search a place or address…"><div class="location-results" id="pickupResults"></div><div class="location-actions"><button type="button" class="btn btn-light" id="useCurrentLocation">◎ Use my current location</button></div><div class="location-status" id="pickupStatus">Search for a place and press Enter, or use your device location.</div></div>`+`<div class="field location-search-wrap"><label>Destination</label><input id="destinationLocation" required autocomplete="off" placeholder="Search destination or address…"><div class="location-results" id="destinationResults"></div><div class="location-actions"><button type="button" class="btn btn-light" id="pickDestinationMap">⌖ Choose on map</button></div><div class="location-status" id="destinationStatus">Search a place or choose a point on the map.</div><div class="map-picker" id="destinationMapPicker" style="display:none"><div class="map-picker-head"><span>Choose destination</span><button type="button" class="text-btn" id="closeDestinationMap">Close map</button></div><div class="map-live-canvas" id="destinationLiveMap" aria-label="OpenStreetMap destination picker"></div><div class="map-preview demo-map" id="destinationMapCanvas" role="button" tabindex="0" aria-label="Select destination point on map"><span class="map-pin">📍</span><span class="map-hint">Tap the map to place the pin</span></div><div class="map-footer" id="destinationMapNote">Use the interactive OpenStreetMap above to choose a real destination point.</div><div style="padding:0 12px 12px;background:#fff"><button type="button" class="btn btn-primary" id="confirmDestinationMap">Use this point</button></div></div></div>`+field('Mobile number','09XX XXX XXXX','tel')+`<div class="field"><label>Payment method</label><select id="paymentMethod" required><option value="Cash">Cash</option><option value="QR Ph">QR Ph (scan to pay)</option></select></div><div class="field"><label>Tip for your rider (optional)</label><select id="riderTip"><option value="0">No tip</option><option value="10">₱10</option><option value="20">₱20</option><option value="50">₱50</option><option value="custom">Enter custom tip</option></select></div><div class="field" id="customTipWrap" style="display:none"><label>Custom tip amount (₱)</label><input id="customTip" type="number" min="1" step="1" placeholder="e.g. 15"></div><div class="notice">Tips go to the rider and are separate from the ride fare. QR Ph is a demo option until a QR Ph-compatible payment provider is connected.</div>`,'Preview ride request'],
+ verify:['Verify your account','Start a verification request. This prototype does not securely collect or verify identity documents.',field('Full name','Your full name')+field('Mobile number','09XX XXX XXXX','tel')+field('Email address','you@example.com','email')+field('Verification method','Government ID (handled securely in production)'),'Submit demo request'],
+ partner:['Partner application','Choose the partner role you want to apply for.',`<div class="field"><label>Partner type</label><select required><option>Rider with own motorcycle</option><option>Rider using owner motorcycle</option><option>Motorcycle owner / rental provider</option></select></div>`+field('Full name','Your full name')+field('Mobile number','09XX XXX XXXX','tel'),'Preview application'],
+ notifications:['Notifications','You have no new notifications in this prototype.','<div class="notice">Booking updates and safety alerts will appear here when notifications are connected.</div>','Done'],
+ help:['Help & support','For this demo, contact options are placeholders. Production support should include emergency guidance and a complaint channel.','<div class="notice">Never share passwords or OTPs. In an emergency, contact the appropriate local emergency services.</div>','Close'],
+ rental:['Rental request',`Request a self-drive rental for ${selectedRental?.name||'a motorcycle'}. Rental owner approval and license checks are required.`,field('Start date','Select start date','date')+field('Return date','Select return date','date')+field('Mobile number','09XX XXX XXXX','tel')+`<div class="field"><label>Payment method</label><select id="paymentMethod" required><option value="Cash">Cash</option><option value="QR Ph">QR Ph (scan to pay)</option></select></div><div class="notice">QR Ph is a demo option until a QR Ph-compatible payment provider is connected.</div>`,'Preview rental request']
+ };
+ const c=configs[which]||configs.ride;title.textContent=c[0];desc.textContent=c[1];fields.innerHTML=c[2];submit.textContent=c[3];wrap.classList.add('open');
+ wirePickupSearch();
+ wireDestinationPicker();
+ const tipSelect=document.getElementById('riderTip');
+ if(tipSelect){tipSelect.addEventListener('change',()=>{const custom=document.getElementById('customTipWrap');if(custom)custom.style.display=tipSelect.value==='custom'?'grid':'none';});}
+}
+function closeModal(){wrap.classList.remove('open')}
+wrap.addEventListener('click',e=>{if(e.target===wrap)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('modalForm').addEventListener('submit',e=>{e.preventDefault();let msg='Demo only — no booking, verification, payment, or driver dispatch has been sent.';if(mode==='ride'){const method=document.getElementById('paymentMethod')?.value||'Cash';let tip=document.getElementById('riderTip')?.value||'0';if(tip==='custom'){tip=document.getElementById('customTip')?.value||'0';}msg='Ride request preview created. Payment: '+method+'. Rider tip: ₱'+Number(tip||0).toFixed(2)+'. Tips are separate from the fare and assigned to the rider. In a live app, a verified rider would be matched and payment securely processed.';addBooking('Pasundo ride','Payment: '+method+' · Tip: ₱'+Number(tip||0).toFixed(2));}else if(mode==='rental'){const method=document.getElementById('paymentMethod')?.value||'Cash';msg='Rental request preview created. Payment method: '+method+'. In a live app, the owner would confirm availability and payment would be processed securely.';addBooking('MotoRent · '+(selectedRental?.name||'Motorcycle'),'Payment: '+method+' · Request preview');}else if(mode==='partner'){msg='Partner application preview completed. Admin review and document verification are required before activation.'}else if(mode==='verify'){msg='Verification flow previewed. Connect a secure verification provider before collecting real identity data.'}result.textContent=msg;result.classList.add('show');});
+function addBooking(name,status){const box=document.getElementById('bookingList');if(box.querySelector('p'))box.innerHTML='';const row=document.createElement('div');row.className='trip';row.innerHTML=`<div class="trip-icon">🛵</div><div><strong></strong><small></small></div><span class="price">Demo</span>`;row.querySelector('strong').textContent=name;row.querySelector('small').textContent=status;box.prepend(row)}
+function rent(name,price){selectedRental={name,price};showModal('rental')}
+document.getElementById('quickRide').addEventListener('submit',e=>{e.preventDefault();showModal('ride')});
+document.getElementById('rentalSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('.rental').forEach(card=>card.style.display=card.dataset.name.includes(q)?'':'none')});
+</script>
+</body></html>
